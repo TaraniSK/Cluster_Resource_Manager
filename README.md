@@ -87,42 +87,41 @@ Represents an **external task submitter**.
 
 ### ⚖️ Load-Aware Greedy + FCFS Scheduling
 
-* Tasks are picked in **First-Come, First-Served** order.
-* Dispatched to the node with **lowest CPU and memory usage**.
-* Ensures fairness while optimizing resource efficiency.
+* Tasks are picked in **First-Come, First-Served (FCFS)** order from a central task queue.
+* Each task is **greedily dispatched** to the node with the **lowest combined CPU and memory usage**.
+* Ensures fairness in task arrival while maximizing resource efficiency through intelligent load-based decisions.
+
+---
 
 ### 🛡️ Reactive Fault Recovery
 
-* Manager continuously monitors heartbeat timestamps.
-* On node failure, **reassigns in-progress tasks** to healthy nodes.
-* Guarantees no tasks are dropped even on crash.
+* The Manager **continuously monitors** the **heartbeat timestamps** received from each node.
+* If a node misses multiple heartbeats, it is marked as **unresponsive or failed**.
+* All tasks **in progress on the failed node** are **re-queued** and reassigned to other healthy nodes.
+* Guarantees **no task is lost**, even in the event of node crashes or unexpected disconnections.
 
-### 🔄 Concurrent Execution
+---
 
-🔄 Concurrent Execution with Multithreading
-The entire system is built using C++ multithreading (std::thread) to support scalable, real-time parallelism across tasks, resource monitoring, and communication.
+### 🔄 Concurrent Execution with Multithreading
 
-🧠 On the Manager:
-Each client connection (task submitter) is handled in a separate thread.
+The system is built using **C++ multithreading (`std::thread`)** to support real-time, parallel task management and communication.
 
-Each node agent connection is also managed in its own thread.
+#### 🔹 On the Manager:
 
-A dedicated scheduler thread continuously evaluates the task queue and assigns tasks.
+* Each **client connection** is handled in a separate thread.
+* Each **node agent connection** is served by a dedicated thread.
+* A **scheduling thread** runs in the background, assigning tasks from the queue to suitable nodes.
+* A **heartbeat monitoring thread** checks for missed pings and triggers task reassignment.
+* Shared data (task queues, node status maps) is protected using **`std::mutex`**, **`std::lock_guard`**, and **`std::unique_lock`** where needed.
 
-A heartbeat monitor thread checks for node liveness and triggers failover if needed.
+#### 🔹 On the Node Agent:
 
-All shared data structures (task queues, node maps) are protected using std::mutex and std::lock_guard to ensure thread safety.
+* A thread listens for **incoming tasks** and handles execution.
+* A separate thread gathers **CPU and memory metrics** and sends periodic updates to the Manager.
+* Optional: Additional thread for sending/receiving **heartbeat messages**.
+* **`std::atomic`** is used to coordinate shutdown flags and signal-safe behavior (e.g., on Ctrl+C).
 
-🧩 On the Node Agent:
-A thread handles task reception and execution.
-
-Another thread periodically gathers and sends CPU and memory usage to the Manager.
-
-Optionally, a separate thread may handle heartbeat acknowledgments or reconnect logic.
-
-Use of std::atomic ensures correctness for shared flags like shutdown signals.
-
-🧵 Multithreading is critical to ensure responsiveness, non-blocking operations, and efficient resource monitoring across the system.
+> 🧵 **Multithreading ensures the system remains responsive, scalable, and consistent even under high load.**
 
 ---
 
