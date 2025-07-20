@@ -99,15 +99,30 @@ Represents an **external task submitter**.
 
 ### 🔄 Concurrent Execution
 
-* Manager spawns new threads for:
+🔄 Concurrent Execution with Multithreading
+The entire system is built using C++ multithreading (std::thread) to support scalable, real-time parallelism across tasks, resource monitoring, and communication.
 
-  * Each client and node connection
-  * Heartbeat monitoring
-  * Task reassignment
-* Node Agents spawn:
+🧠 On the Manager:
+Each client connection (task submitter) is handled in a separate thread.
 
-  * Resource usage updater
-  * Task listener and executor
+Each node agent connection is also managed in its own thread.
+
+A dedicated scheduler thread continuously evaluates the task queue and assigns tasks.
+
+A heartbeat monitor thread checks for node liveness and triggers failover if needed.
+
+All shared data structures (task queues, node maps) are protected using std::mutex and std::lock_guard to ensure thread safety.
+
+🧩 On the Node Agent:
+A thread handles task reception and execution.
+
+Another thread periodically gathers and sends CPU and memory usage to the Manager.
+
+Optionally, a separate thread may handle heartbeat acknowledgments or reconnect logic.
+
+Use of std::atomic ensures correctness for shared flags like shutdown signals.
+
+🧵 Multithreading is critical to ensure responsiveness, non-blocking operations, and efficient resource monitoring across the system.
 
 ---
 
