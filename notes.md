@@ -29,7 +29,7 @@
 
 *Terminal 5:*
 
-9. ./build/task\_client 127.0.0.1 5000 10
+9. ./build/client 127.0.0.1 5000 10
     
    This will submit 10 tasks. It will also schedule, and assign it to nodes.
 
