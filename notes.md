@@ -11,7 +11,7 @@
 5. make
    
    This will create the build directory and the executables (cluster\_manager, node\_agent, task\_client) inside it. It will also create the logs directory.
-7. ./build/cluster\_manager
+7. ./build/manager
 8. Open multiple new terminal windows for each node agent (Ex:3 nodes)
 
 
